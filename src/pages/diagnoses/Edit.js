@@ -1,84 +1,119 @@
-import { useEffect, useState } from "react"
-import axios from 'axios'
-import { useNavigate } from 'react-router-dom';
-import { useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import axios from 'axios';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from "../../utils/useAuth";
+import { useForm } from '@mantine/form';
+import { TextInput, Select, Button } from '@mantine/core';
 
-const Edit = () => {
-    const {token} = useAuth();
-    const navigate = useNavigate();    
+const EditDiagnosis = () => {
+    const { token } = useAuth();
+    const navigate = useNavigate();
     const { id } = useParams();
-
-    // Starting off with an empty object for our form
-    const [form, setForm] = useState({})
+    
+    const [patients, setPatients] = useState([]);
+    const [diagnosis, setDiagnosis] = useState(null);
 
     useEffect(() => {
-        axios.get(`https://festivals-api.vercel.app/api/festivals/${id}`, {
-            headers: {
-                Authorization: `Bearer ${token}`
+        const fetchDiagnosisAndPatients = async () => {
+            try {
+                const diagnosisResponse = await axios.get(`https://fed-medical-clinic-api.vercel.app/diagnoses/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                setDiagnosis(diagnosisResponse.data);
+
+                const patientsResponse = await axios.get('https://fed-medical-clinic-api.vercel.app/patients', {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                setPatients(patientsResponse.data);
+            } catch (err) {
+                console.error(err);
             }
-        })
-            .then((res) => {
-                console.log(res)  
-                // Making a request to get info on festivals/{id}
-                // Then set our form data using that, so our fields get pre-populated              
-                setForm(res.data)
-            })
-            .catch((err) => {
-                console.error(err)
-            })
-    }, [])
+        };
 
+        fetchDiagnosisAndPatients();
+    }, [id, token]);
 
+    const form = useForm({
+        initialValues: {
+            patient_id: '',
+            condition: '',
+            diagnosis_date: '',
+        },
+        validate: {
+            patient_id: (value) => value ? null : 'Patient is required',
+            condition: (value) => value ? null : 'Condition is required',
+            diagnosis_date: (value) => value ? null : 'Diagnosis date is required',
+        },
+    });
 
-    const handleSubmit = () => {
-        axios.put(`https://festivals-api.vercel.app/api/festivals/${id}`, form, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        })
-            .then((res) => {
-                console.log(res.data)
-                navigate(`/festivals/${id}`, { relative: 'path', replace: true })
-            })
-            .catch((err) => {
-                console.error(err)
-            })
-    }
+    useEffect(() => {
+        if (diagnosis) {
+            form.setValues({
+                patient_id: diagnosis.patient_id,
+                condition: diagnosis.condition,
+                diagnosis_date: new Date(diagnosis.diagnosis_date).toISOString().slice(0, 10),
+            });
+        }
+    }, [diagnosis, form]);
 
-    const handleChange = (e) => {
-        setForm(({
-            ...form,
-            [e.target.name]: e.target.value
-        }))
-    }
+    const handleSubmit = async (values) => {
+        try {
+            await axios.put(`https://fed-medical-clinic-api.vercel.app/diagnoses/${id}`, values, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            navigate('/diagnoses');
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
+    if (!diagnosis) return <div>Loading...</div>;
+
+    const patientOptions = patients.map(patient => ({
+        value: patient.id,
+        label: `${patient.first_name} ${patient.last_name}`,
+    }));
 
     return (
         <div>
-            <h1>Edit a festival</h1>
-            <div>
-                <input type='text' placeholder='Title' name='title' value={form.title} onChange={handleChange} />
-                <input type='text' placeholder='Description' name='description' value={form.description} onChange={handleChange} />
-
-                <select name='city' onChange={handleChange}>
-                    <option value='dublin'>Dublin</option>
-                    <option value='cork'>Cork</option>
-                    <option value='galway'>Galway</option>
-                    <option value='waterford'>Waterford</option>
-                    {/* If there was some city in the existing festival, add that as an option in our select */}
-                    <option value={form.city}>{form.city}</option>
-                </select>
-
-                <input value={form.start_date} type='date' name='start_date' onChange={handleChange} />
-
-                <input value={form.end_date} type='date' name='end_date' onChange={handleChange} />
-
-                <button onClick={handleSubmit}>Submit</button>
-
-            </div>
+            <h1>Edit Diagnosis</h1>
+            <form onSubmit={form.onSubmit(handleSubmit)}>
+                <Select
+                    label="Select Patient"
+                    name="patient_id"
+                    value={form.values.patient_id}
+                    onChange={(value) => form.setFieldValue('patient_id', value)}
+                    data={patientOptions}
+                    error={form.errors.patient_id}
+                    required
+                />
+                <TextInput
+                    label="Condition"
+                    name="condition"
+                    value={form.values.condition}
+                    onChange={(e) => form.setFieldValue('condition', e.currentTarget.value)}
+                    error={form.errors.condition}
+                    required
+                />
+                <TextInput
+                    label="Diagnosis Date"
+                    name="diagnosis_date"
+                    type="date"
+                    value={form.values.diagnosis_date}
+                    onChange={(e) => form.setFieldValue('diagnosis_date', e.currentTarget.value)}
+                    error={form.errors.diagnosis_date}
+                    required
+                />
+                <Button type="submit">Update Diagnosis</Button>
+            </form>
         </div>
-    )
-}
+    );
+};
 
-export default Edit;
+export default EditDiagnosis;

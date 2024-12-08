@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { useParams } from "react-router-dom";
 import { useAuth } from '../../utils/useAuth';
 import { useNavigate } from 'react-router-dom';
 
 
-const Index = () => {
+const SingleAppointment = () => {
     const [doctors, setDoctors] = useState([]);
-    const [appointments, setAppointments] = useState([]);
+    const [appointment, setAppointment] = useState([]);
     const [patients, setPatients] = useState([]);
     const navigate = useNavigate();
     const {token} = useAuth();
+    const { id } = useParams();
 
     useEffect(()=>{
         const fetchDoctorsAndPatientsAndAppointments = async () => {
@@ -29,49 +31,44 @@ const Index = () => {
                 });
             setPatients(patientResponse.data);
 
-                const appointmentResponse = await axios.get('https://fed-medical-clinic-api.vercel.app/appointments', {
+                const appointmentResponse = await axios.get(`https://fed-medical-clinic-api.vercel.app/appointments/${id}`, {
                     headers: {
                       Authorization: `Bearer ${token}`,
                    },
                });
-            setAppointments(appointmentResponse.data);
+            setAppointment(appointmentResponse.data);
             } catch (err) {
                 console.error(err);
             }
         };
         fetchDoctorsAndPatientsAndAppointments();
-    },[token]);
+    },[id, token]);
 
 
-    if (!appointments) return 'Loading...'
+    if (!appointment) return 'Loading...'
 
-    return (
-        <div>
-            
-        {
-            appointments && appointments.map((appointment) => {
-                // error with this code, instead i find doc/patient by id to ensure they exist
-                // const doctor = appointment.doctor;
-                // const patient = appointment.patient;
-                const doctor = doctors.find((d) => d.id === appointment.doctor_id);
-                const patient = patients.find((p) => p.id === appointment.patient_id);                
+    const doctor = doctors.find((d) => d.id === appointment.doctor_id);
+    const patient = patients.find((p) => p.id === appointment.patient_id);                
+
                     return (
                     <div>
+                        {doctor && patient && (
                         <div>
+                            <Link to={`/appointment/${id}/edit`}>
+                            Edit appointment
+                            </Link>
+                            <Link to={`/appointment/${id}/delete`}>
+                            Delete appointment
+                            </Link>
                         <h2>Appointment with Dr {doctor.first_name} {doctor.last_name}</h2>
                         <p><strong>Specialisation:</strong> {doctor.specialisation}</p>
                         <p><strong>Patient:</strong> {patient.first_name} {patient.last_name}</p>
                         <p><strong>Appointment Date:</strong> {new Date(appointment.appointment_date).toLocaleString()}</p>
                         </div>
-                        <button onClick={() => navigate(`/appointment/${appointment.id}`)}>
-                                View
-                            </button>
+                        )}
+                      
                     </div>
-                )
-            })
-        }
-    </div>
-    )
+                )   
 };
 
-export default Index;
+export default SingleAppointment;

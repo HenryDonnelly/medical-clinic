@@ -35,6 +35,10 @@ const Navbar = () => {
                         <li><Link to='/register'>Register</Link></li>
                         <li><Link to='/login'>Login</Link></li>
                         <li><Link to='/doctors'>doctors</Link></li>
+                        <li><Link to='/patients'>patients</Link></li>
+                        <li><Link to='/appointments'>appointments</Link></li>
+                        <li><Link to='/diagnoses'>diagnoses</Link></li>
+                        <li><Link to='/prescriptions'>prescription</Link></li>
                         <button onClick={() => {
                             logout();
                             navigate('/login', { replace: true });
@@ -42,6 +46,18 @@ const Navbar = () => {
 
                         <button onClick={() => navigate('/doctor/create')}>
                             Create Doctor
+                        </button>
+                        <button onClick={() => navigate('/patient/create')}>
+                            Create Patient
+                        </button>
+                        <button onClick={() => navigate('/appointment/create')}>
+                            Create Appointment
+                        </button>
+                        <button onClick={() => navigate('/diagnoses/create')}>
+                            Create diagnoses
+                        </button>
+                        <button onClick={() => navigate('/prescription/create')}>
+                            Create prescription
                         </button>
                     </ul>
                 </div>

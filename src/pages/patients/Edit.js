@@ -1,84 +1,159 @@
-import { useEffect, useState } from "react"
-import axios from 'axios'
-import { useNavigate } from 'react-router-dom';
-import { useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import axios from 'axios';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from "../../utils/useAuth";
+import { useForm } from '@mantine/form';
+import { TextInput, Button } from '@mantine/core';
+import dayjs from 'dayjs'; // Imported dayjs for date formatting
 
 const Edit = () => {
-    const {token} = useAuth();
-    const navigate = useNavigate();    
+    const { token } = useAuth();
+    const navigate = useNavigate();
     const { id } = useParams();
 
-    // Starting off with an empty object for our form
-    const [form, setForm] = useState({})
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
+    // Initialize form with empty values (initially)
+    const form = useForm({
+        initialValues: {
+            first_name: '',
+            last_name: '',
+            email: '',
+            phone: '',
+            address: '',
+            date_of_birth: '',  // date will be handled as string in format 'YYYY-MM-DD'
+        },
+        validate: {
+            first_name: (value) => value.length > 2 ? null : 'First name must be at least 3 characters',
+            last_name: (value) => value.length > 2 ? null : 'Last name must be at least 3 characters',
+            email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email address'),
+            phone: (value) => value.length === 10 ? null : 'Phone number must be exactly 10 digits',
+            address: (value) => value ? null : 'Address is required',
+            date_of_birth: (value) => value ? null : 'Date of birth is required',
+        },
+    });
+
+    // Fetch the patient data after the component loads, preventing form update bug
     useEffect(() => {
-        axios.get(`https://festivals-api.vercel.app/api/festivals/${id}`, {
-            headers: {
-                Authorization: `Bearer ${token}`
+        const fetchData = async () => {
+            try {
+                const res = await axios.get(`https://fed-medical-clinic-api.vercel.app/patients/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+                // sets the update form from empty to current patient data
+                form.setValues(res.data);
+            } catch (err) {
+                console.error(err);
+                setError("Failed to load patient data");
+            } finally {
+                setLoading(false);
             }
-        })
-            .then((res) => {
-                console.log(res)  
-                // Making a request to get info on festivals/{id}
-                // Then set our form data using that, so our fields get pre-populated              
-                setForm(res.data)
-            })
-            .catch((err) => {
-                console.error(err)
-            })
-    }, [])
+        };
 
+        fetchData();
+    }, [id, token]);
 
-
+    // Handle form submission
     const handleSubmit = () => {
-        axios.put(`https://festivals-api.vercel.app/api/festivals/${id}`, form, {
+        if (form.validate().hasErrors) {
+            return;
+        }
+
+        // Prepare data to send in PATCH request
+        const updatedPatientData = {
+            first_name: form.values.first_name,
+            last_name: form.values.last_name,
+            email: form.values.email,
+            phone: form.values.phone,
+            address: form.values.address,
+            date_of_birth: form.values.date_of_birth, // This is already in 'YYYY-MM-DD' format
+        };
+
+        axios.patch(`https://fed-medical-clinic-api.vercel.app/patients/${id}`, updatedPatientData, {
             headers: {
-                Authorization: `Bearer ${token}`
-            }
+                Authorization: `Bearer ${token}`,
+            },
         })
-            .then((res) => {
-                console.log(res.data)
-                navigate(`/festivals/${id}`, { relative: 'path', replace: true })
-            })
-            .catch((err) => {
-                console.error(err)
-            })
+        .then((res) => {
+            console.log(res.data);
+            navigate('/patients');
+        })
+        .catch((err) => {
+            console.error(err);
+            setError("Failed to update patient data");
+        });
+    };
+
+    if (loading) {
+        return <div>Loading...</div>;
     }
 
-    const handleChange = (e) => {
-        setForm(({
-            ...form,
-            [e.target.name]: e.target.value
-        }))
+    if (error) {
+        return <div>{error}</div>;
     }
-
 
     return (
         <div>
-            <h1>Edit a festival</h1>
-            <div>
-                <input type='text' placeholder='Title' name='title' value={form.title} onChange={handleChange} />
-                <input type='text' placeholder='Description' name='description' value={form.description} onChange={handleChange} />
-
-                <select name='city' onChange={handleChange}>
-                    <option value='dublin'>Dublin</option>
-                    <option value='cork'>Cork</option>
-                    <option value='galway'>Galway</option>
-                    <option value='waterford'>Waterford</option>
-                    {/* If there was some city in the existing festival, add that as an option in our select */}
-                    <option value={form.city}>{form.city}</option>
-                </select>
-
-                <input value={form.start_date} type='date' name='start_date' onChange={handleChange} />
-
-                <input value={form.end_date} type='date' name='end_date' onChange={handleChange} />
-
-                <button onClick={handleSubmit}>Submit</button>
-
-            </div>
+            <h1>Edit Patient</h1>
+            <form onSubmit={form.onSubmit(handleSubmit)}>
+                <TextInput
+                    label="First Name"
+                    name="first_name"
+                    value={form.values.first_name}
+                    onChange={(e) => form.setFieldValue('first_name', e.currentTarget.value)}
+                    error={form.errors.first_name}
+                    required
+                />
+                <TextInput
+                    label="Last Name"
+                    name="last_name"
+                    value={form.values.last_name}
+                    onChange={(e) => form.setFieldValue('last_name', e.currentTarget.value)}
+                    error={form.errors.last_name}
+                    required
+                />
+                <TextInput
+                    label="Email"
+                    name="email"
+                    value={form.values.email}
+                    onChange={(e) => form.setFieldValue('email', e.currentTarget.value)}
+                    error={form.errors.email}
+                    required
+                />
+                <TextInput
+                    label="Phone"
+                    name="phone"
+                    value={form.values.phone}
+                    onChange={(e) => form.setFieldValue('phone', e.currentTarget.value)}
+                    error={form.errors.phone}
+                    required
+                />
+                <TextInput
+                    label="Address"
+                    name="address"
+                    value={form.values.address}
+                    onChange={(e) => form.setFieldValue('address', e.currentTarget.value)}
+                    error={form.errors.address}
+                    required
+                />
+                <TextInput
+                    label="Date of Birth"
+                    name="date_of_birth"
+                    type="date"
+                    value={form.values.date_of_birth} // Date is in 'YYYY-MM-DD' format
+                    onChange={(e) => form.setFieldValue('date_of_birth', e.currentTarget.value)} // Keep it in 'YYYY-MM-DD' format
+                    error={form.errors.date_of_birth}
+                    required
+                />
+                
+                <Button type="submit">Submit</Button>
+            </form>
         </div>
-    )
-}
+    );
+};
 
 export default Edit;

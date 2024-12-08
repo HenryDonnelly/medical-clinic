@@ -1,103 +1,60 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../../utils/useAuth';
-
-const FestivalsContainer = ({children}) => {
-    return (
-        <div style={{
-            margin: 'auto',
-            width: '1200px'
-        }}>
-            {children}
-        </div>
-    )
-}
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../utils/useAuth";
 
 const Index = () => {
-    const [festivals, setFestivals] = useState(null);
+  const { token } = useAuth();
+  const navigate = useNavigate();
+  const [prescriptions, setPrescriptions] = useState([]);
 
-    const {token} = useAuth();
-
-    useEffect(() => {
-        axios.get('https://festivals-api.vercel.app/api/festivals')
-            .then(response => {
-                console.log(response.data);
-                setFestivals(response.data);
-            })
-            .catch(err => {
-                console.log(err);
-            });
-    }, []);
-
-    const handleDelete = (id) => {
-        if (!token) {
-            alert('Unauthorised! Login to delete')
-            return;
-        }
-
-        axios.delete(`https://festivals-api.vercel.app/api/festivals/${id}`, {
+  useEffect(() => {
+    const fetchPrescriptions = async () => {
+      try {
+        const response = await axios.get(
+          "https://fed-medical-clinic-api.vercel.app/prescriptions",
+          {
             headers: {
-                Authorization: `Bearer ${token}`
-            }
-        }).then((res) => {
-            console.log(res);
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setPrescriptions(response.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
-            // Deleting succeeded, but has only updated festival in the DB
-            // It won't update the state by itself. We'll handle that here, so the UI reflects the change
-            // Again recall that state is *immutable* - we aren't modifying the original array (which is not allowed)
-            // Filter is returning an entirely *new* array with an element filtered out
-            setFestivals(festivals.filter((festival) => {
-                return festival._id != id;
-            }))
+    fetchPrescriptions();
+  }, [token]);
 
-        }).catch((err) => {
-            console.error(err)
-        })
-    }
+  if (!prescriptions.length) {
+    return <div>Loading...</div>;
+  }
 
-    if (!festivals) return 'Loading...'
-
-    return (
-        <FestivalsContainer>
-            
-            <Link to='/festivals/create'>Create</Link>
-            {/* // Object destructuring */}
-            {festivals.map(({ _id, title, city, description, start_date, end_date }) => {
-                // equivalent to: festivals.title, festivals.city
-                // pulling attributes out of the object (you can do this with arrays too)
-                return (
-                    <div>
-                        <Link to={`/festivals/${_id}`}>
-                            <h1>{title}</h1>
-                        </Link>
-
-                        <button onClick={() => {
-                            const confirmDelete = window.confirm('are you sure?')
-
-                            if (confirmDelete) {
-                                handleDelete(_id)
-                            }
-                        }}>
-                            Delete 🗑️
-                        </button>
-
-                        <h2>{city}</h2>
-                        <p>{description}</p>
-                        <div>
-                            <span>
-                                Start date: {start_date?.split('T'[0])}
-                            </span>
-                            <br />
-                            <span>
-                                End date: {end_date?.split('T'[0])}
-                            </span>
-                        </div>
-                    </div>
-                )
-            })}
-        </FestivalsContainer>
-    )
+  return (
+    <div>
+      <h1>Prescriptions List</h1>
+      <div>
+        {prescriptions.map((prescription) => (
+          <div key={prescription.id}>
+            <h2>
+              {prescription.medication} for{" "}
+              {prescription.patient_first_name} {prescription.patient_last_name}
+            </h2>
+            <p>Dosage: {prescription.dosage}</p>
+            <p>Start Date: {new Date(prescription.start_date).toLocaleDateString()}</p>
+            <p>End Date: {new Date(prescription.end_date).toLocaleDateString()}</p>
+            <div>
+              <button onClick={() => navigate(`/prescription/${prescription.id}`)}>
+                View
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 };
 
 export default Index;

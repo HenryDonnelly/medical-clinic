@@ -31,24 +31,25 @@ const Edit = () => {
         },
     });
 
-    {/*Fetch the doctor data when the component loads*/}
+    {/*Fetch the doctor data AFTER the component loads!!!*/}
     useEffect(() => {
-        axios.get(`https://fed-medical-clinic-api.vercel.app/doctors/${id}`, {
-            headers: {
-                Authorization: `Bearer ${token}`,
+        const fetchDoctorData = async () => {
+            try {
+                const res = await axios.get(`https://fed-medical-clinic-api.vercel.app/doctors/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                form.setValues(res.data);
+            } catch (err) {
+                console.error(err);
+                setError("Failed to load doctor data");
+            } finally {
+                setLoading(false);
             }
-        })
-        .then((res) => {
-            {/*Populate the form with the fetched doctor data*/}
-            form.setValues(res.data);
-            setLoading(false);
-        })
-        .catch((err) => {
-            console.error(err);
-            setError("Failed to load doctor data");
-            setLoading(false);
-        });
-    }, [id, token, form]);
+        };
+        fetchDoctorData();
+    }, [id, token]); //including form also kept update bug
 
     const handleSubmit = () => {
         if (form.validate().hasErrors) {
