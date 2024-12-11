@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useState } from "react";
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import LoginForm from "./components/LoginForm";
@@ -42,11 +43,7 @@ import { AppShell, MantineProvider, Header } from "@mantine/core";
 
 export const UserContext = createContext();
 
-export const Container = ({ children }) => {
-    <div style={{ width: '1200px', margin: 'auto' }}>
-        {children}
-    </div>
-}
+
 
 const App = () => {
     // We wrap the entire app in the auth provider
@@ -54,19 +51,15 @@ const App = () => {
     return (
         <div>
             <AuthProvider>
-                <MantineProvider withGlobalStyles withNormalizeCSS>
-                <UserContext.Provider value={{
-                    username: 'Joe Bloggs',
-                    email: 'joe.bloggs@email.com'
-                }}>
+                <MantineProvider theme={{ colorScheme: 'dark' }} withGlobalStyles withNormalizeCSS>
                     <Router>
+                    {/* passing toggle as prop to navbar */}
+                <Navbar/>
+                <UserContext.Provider value={{ username: 'Joe Bloggs', email: 'joe.bloggs@email.com' }}>
+
                     <AppShell
-      padding="md"
+      padding="0px"
       navbar={<Navbar/>}
-      header={<Header height={60} p="xs">Clinic Manager</Header>}
-      styles={(theme) => ({
-        main: { backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[0] },
-      })}
     >
                         <Navbar />
                         <Routes>
@@ -127,8 +120,8 @@ const App = () => {
                             <Route path='/register' element={<RegisterForm />} />
                         </Routes>
                         </AppShell>
-                    </Router>
                 </UserContext.Provider>
+                </Router>
                 </MantineProvider>
             </AuthProvider>
         </div>

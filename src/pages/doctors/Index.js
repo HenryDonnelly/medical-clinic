@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../utils/useAuth';
-import { TextInput, Select, Button } from '@mantine/core'; 
+import { TextInput, Select, Button, Card, Text, Badge, Group, Grid, Col } from '@mantine/core'; 
 import { useNavigate } from "react-router-dom";
 
 
@@ -38,27 +38,32 @@ const Index = () => {
 
     return (
         <div>
-        <div>
-            
+            <Grid>
             {
                 doctors && doctors.map((doctor) => {
                     return (
-                        <div>
-                            <div>
-                                <h2>Dr {doctor.first_name} {doctor.last_name}</h2>
-                                <p>Specialisation: {doctor.specialisation}</p>
-                                <div >
-                                <button onClick={() => navigate(`/doctor/${doctor.id}`)}>
-                                View
-                            </button>
-                                </div>
-                            </div>
-                        </div>
+                        <Col span={4}>
+                        <Card style={{marginTop:20}}>
+                            <Text weight={500}>
+                        Dr {doctor.first_name} {doctor.last_name}
+                        </Text>
+                        <Text style={{marginTop:20, marginBottom:5}}>
+                        Specialisation: {doctor.specialisation}
+                        </Text>
+                        <Button
+                                        variant="outline"
+                                        color="blue"
+                                        onClick={() => navigate(`/doctor/${doctor.id}`)}
+                                    >
+                                        View
+                                    </Button>
+                            </Card>
+                            </Col>
                     )
                 })
             }
+            </Grid>
         </div>
-    </div>
     );
 };
 

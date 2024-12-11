@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../utils/useAuth';
 import { useNavigate } from "react-router-dom";
+import { TextInput, Select, Button, Card, Text, Badge, Group, Grid, Col } from '@mantine/core'; 
 
 
 
@@ -32,28 +33,33 @@ const Index = () => {
         return <div>Loading...</div>
     }
     return (
-            <div>
-                <div>
-                {
+        <div>
+            <Grid>
+            {
                 patients && patients.map((patient) => {
                     return (
-                        <div>
-                            <div>
-                                <h2>{patient.first_name} {patient.last_name}</h2>
-                                <div >
-                                <button onClick={() => navigate(`/patient/${patient.id}`)}>
-                                View
-                            </button>
-                                </div>
-                            </div>
-                        </div>
+                        <Col span={4}>
+                        <Card style={{marginTop:20}}>
+                            <Text weight={500}>
+                        Dr {patient.first_name} {patient.last_name}
+                        </Text>
+                        <Text style={{marginTop:20, marginBottom:5}}>
+                        </Text>
+                        <Button
+                                        variant="outline"
+                                        color="blue"
+                                        onClick={() => navigate(`/patient/${patient.id}`)}
+                                    >
+                                        View
+                                    </Button>
+                            </Card>
+                            </Col>
                     )
                 })
             }
-                </div>
-            </div>
-                
-    )
+            </Grid>
+        </div>
+    );
 };
 
 export default Index;
