@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../utils/useAuth";
+import {Card, Col,Grid,Text,Button} from '@mantine/core'
 
 const Index = () => {
   const { token } = useAuth();
@@ -32,29 +33,37 @@ const Index = () => {
     return <div>Loading...</div>;
   }
 
-  return (
-    <div>
-      <h1>Prescriptions List</h1>
-      <div>
-        {prescriptions.map((prescription) => (
-          <div key={prescription.id}>
-            <h2>
-              {prescription.medication} for{" "}
-              {prescription.patient_first_name} {prescription.patient_last_name}
-            </h2>
-            <p>Dosage: {prescription.dosage}</p>
+return (
+  <div>
+      <Grid>
+      {
+          prescriptions && prescriptions.map((prescription) => {
+              return (
+                  <Col span={4}>
+                  <Card style={{marginTop:20}}>
+                      <Text weight={500}>
+                      {prescription.medication} for {prescription.patient_first_name} {prescription.patient_last_name}
+                  </Text>
+                  <Text style={{marginTop:20, marginBottom:5}}>
+                  <p>Dosage: {prescription.dosage}</p>
             <p>Start Date: {new Date(prescription.start_date).toLocaleDateString()}</p>
             <p>End Date: {new Date(prescription.end_date).toLocaleDateString()}</p>
-            <div>
-              <button onClick={() => navigate(`/prescription/${prescription.id}`)}>
-                View
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+                  </Text>
+                  <Button
+                                  variant="outline"
+                                  color="blue"
+                                  onClick={() => navigate(`/prescription/${prescription.id}`)}
+                              >
+                                  View
+                              </Button>
+                      </Card>
+                      </Col>
+              )
+          })
+      }
+      </Grid>
+  </div>
+);
 };
 
 export default Index;

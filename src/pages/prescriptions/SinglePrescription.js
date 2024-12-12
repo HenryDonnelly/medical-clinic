@@ -3,11 +3,16 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../../utils/useAuth";
 import { Link } from "react-router-dom";
+import {Button} from '@mantine/core'
+import { useNavigate } from 'react-router-dom';
+
 
 const SinglePrescription = () => {
   const { token } = useAuth();
   const { id } = useParams();
   const [prescription, setPrescription] = useState(null);
+  const navigate = useNavigate();
+
 
   useEffect(() => {
     const fetchPrescription = async () => {
@@ -33,22 +38,37 @@ const SinglePrescription = () => {
     return <div>Loading...</div>;
   }
 
-  return (
-    <div>
-        <Link to={`/prescription/${id}/edit`}>
-                Edit prescription
-            </Link>
-            <Link to={`/prescription/${id}/delete`}>
-                Delete prescription
-            </Link>
-      <h1>Prescription Details</h1>
+
+  return prescription && (
+    <div style={{display: 'flex',flexDirection: 'column', alignItems:'center', height: '100vh', justifyContent:'center'}}>
+              <h1>Prescription Details</h1>
       <p>Medication: {prescription.medication}</p>
       <p>Patient: {prescription.patient_first_name} {prescription.patient_last_name}</p>
       <p>Dosage: {prescription.dosage}</p>
       <p>Start Date: {new Date(prescription.start_date).toLocaleDateString()}</p>
       <p>End Date: {new Date(prescription.end_date).toLocaleDateString()}</p>
+
+        <div>
+
+        <Button
+            variant="outline"
+            color="blue"
+            onClick={() => navigate(`/prescription/${prescription.id}/edit`)}
+            >
+            Edit
+        </Button>
+        <Button
+            variant="outline"
+            color="blue"
+            onClick={() => navigate(`/prescription/${prescription.id}/delete`)}
+            >
+            Delete
+        </Button>
+
+        </div>
+
     </div>
-  );
+)
 };
 
 export default SinglePrescription;

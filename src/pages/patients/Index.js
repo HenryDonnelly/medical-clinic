@@ -41,7 +41,7 @@ const Index = () => {
                         <Col span={4}>
                         <Card style={{marginTop:20}}>
                             <Text weight={500}>
-                        Dr {patient.first_name} {patient.last_name}
+                        {patient.first_name} {patient.last_name}
                         </Text>
                         <Text style={{marginTop:20, marginBottom:5}}>
                         </Text>
