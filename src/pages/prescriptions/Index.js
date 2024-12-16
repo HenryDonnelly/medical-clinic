@@ -29,9 +29,7 @@ const Index = () => {
     fetchPrescriptions();
   }, [token]);
 
-  if (!prescriptions.length) {
-    return <div>Loading...</div>;
-  }
+
 
 return (
   <div>

@@ -5,37 +5,14 @@ import { useAuth } from "../../utils/useAuth";
 import { useForm } from '@mantine/form';
 import { TextInput, Select, Button } from '@mantine/core';
 
-const EditDiagnosis = () => {
+const Edit = () => {
     const { token } = useAuth();
     const navigate = useNavigate();
     const { id } = useParams();
     
     const [patients, setPatients] = useState([]);
-    const [diagnosis, setDiagnosis] = useState(null);
-
-    useEffect(() => {
-        const fetchDiagnosisAndPatients = async () => {
-            try {
-                const diagnosisResponse = await axios.get(`https://fed-medical-clinic-api.vercel.app/diagnoses/${id}`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                setDiagnosis(diagnosisResponse.data);
-
-                const patientsResponse = await axios.get('https://fed-medical-clinic-api.vercel.app/patients', {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                setPatients(patientsResponse.data);
-            } catch (err) {
-                console.error(err);
-            }
-        };
-
-        fetchDiagnosisAndPatients();
-    }, [id, token]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     const form = useForm({
         initialValues: {
@@ -51,18 +28,40 @@ const EditDiagnosis = () => {
     });
 
     useEffect(() => {
-        if (diagnosis) {
-            form.setValues({
-                patient_id: diagnosis.patient_id,
-                condition: diagnosis.condition,
-                diagnosis_date: new Date(diagnosis.diagnosis_date).toISOString().slice(0, 10),
-            });
-        }
-    }, [diagnosis, form]);
+        const fetchData = async () => {
+            try {
+                const diagnosisResponse = await axios.get(`https://fed-medical-clinic-api.vercel.app/diagnoses/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                const diagnosisData = diagnosisResponse.data;
+
+                const patientsResponse = await axios.get('https://fed-medical-clinic-api.vercel.app/patients', {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                setPatients(patientsResponse.data);
+
+                form.setValues({
+                    patient_id: diagnosisData.patient_id,
+                    condition: diagnosisData.condition,
+                    diagnosis_date: new Date(diagnosisData.diagnosis_date).toISOString().slice(0, 10),
+                });
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [id, token]);
 
     const handleSubmit = async (values) => {
         try {
-            await axios.put(`https://fed-medical-clinic-api.vercel.app/diagnoses/${id}`, values, {
+            await axios.patch(`https://fed-medical-clinic-api.vercel.app/diagnoses/${id}`, values, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -72,8 +71,6 @@ const EditDiagnosis = () => {
             console.error(err);
         }
     };
-
-    if (!diagnosis) return <div>Loading...</div>;
 
     const patientOptions = patients.map(patient => ({
         value: patient.id,
@@ -116,4 +113,4 @@ const EditDiagnosis = () => {
     );
 };
 
-export default EditDiagnosis;
+export default Edit;

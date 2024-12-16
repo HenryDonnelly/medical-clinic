@@ -1,12 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from 'axios';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from "../../utils/useAuth";
-import { Link } from "react-router-dom";
-import { useNavigate } from 'react-router-dom';
-import {Button} from '@mantine/core'
-
-
+import { Button } from '@mantine/core';
 
 const SingleDiagnoses = () => {
     const { token } = useAuth();
@@ -14,7 +10,6 @@ const SingleDiagnoses = () => {
     const [diagnosis, setDiagnosis] = useState(null);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
-
 
     useEffect(() => {
         const fetchDiagnosis = async () => {
@@ -24,8 +19,11 @@ const SingleDiagnoses = () => {
                         Authorization: `Bearer ${token}`,
                     },
                 });
+                // Log the response to inspect the data structure
+                console.log(response.data);
                 setDiagnosis(response.data);
             } catch (err) {
+                console.error("Error fetching diagnosis data:", err);
                 setError("Failed to fetch diagnosis details");
             }
         };
@@ -35,37 +33,35 @@ const SingleDiagnoses = () => {
 
     if (error) return <div>{error}</div>;
 
+    if (!diagnosis) return <div>Loading...</div>;
 
-    return diagnosis && (
-        <div style={{display: 'flex',flexDirection: 'column', alignItems:'center', height: '100vh', justifyContent:'center'}}>
-            <>
-                    <h1>Diagnosis Details</h1>
-                    <p>Patient ID: {diagnosis.patient_id}</p>
-                    <p>Condition: {diagnosis.condition}</p>
-                    <p>Diagnosis Date: {new Date(diagnosis.diagnosis_date).toLocaleDateString()}</p>
-                </>
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100vh', justifyContent: 'center' }}>
+            
+                <h1>Diagnosis Details</h1>
+                {/* Make sure patient_id matches the actual response field */}
+                <p>Patient ID: {diagnosis.patient_id || diagnosis.patient?.id}</p> 
+                <p>Condition: {diagnosis.condition}</p>
+                <p>Diagnosis Date: {new Date(diagnosis.diagnosis_date).toLocaleDateString()}</p>
 
             <div>
-
-            <Button
-                variant="outline"
-                color="blue"
-                onClick={() => navigate(`/diagnosis/${diagnosis.id}/edit`)}
+                <Button
+                    variant="outline"
+                    color="blue"
+                    onClick={() => navigate(`/diagnoses/${diagnosis.id}/edit`)}
                 >
-                Edit
-            </Button>
-            <Button
-                variant="outline"
-                color="blue"
-                onClick={() => navigate(`/diagnosis/${diagnosis.id}/delete`)}
+                    Edit
+                </Button>
+                <Button
+                    variant="outline"
+                    color="blue"
+                    onClick={() => navigate(`/diagnoses/${diagnosis.id}/delete`)}
                 >
-                Delete
-            </Button>
-
+                    Delete
+                </Button>
             </div>
-
         </div>
-    )
+    );
 };
 
 export default SingleDiagnoses;

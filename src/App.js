@@ -39,6 +39,8 @@ import { AuthProvider } from "./utils/useAuth";
 import { createContext } from "react";
 import './index.css';
 import { AppShell, MantineProvider, Header } from "@mantine/core";
+import { Notifications } from '@mantine/notifications';
+
 
 
 export const UserContext = createContext();
@@ -52,16 +54,16 @@ const App = () => {
         <div>
             <AuthProvider>
                 <MantineProvider theme={{ colorScheme: 'dark' }} withGlobalStyles withNormalizeCSS>
+                <Notifications />
                     <Router>
                     {/* passing toggle as prop to navbar */}
-                <Navbar/>
+                
                 <UserContext.Provider value={{ username: 'Joe Bloggs', email: 'joe.bloggs@email.com' }}>
 
                     <AppShell
-      padding="0px"
-      navbar={<Navbar/>}
-    >
-                        <Navbar />
+                    padding="0px"
+                    navbar={<Navbar/>}
+                    >
                         <Routes>
                             <Route path="/" element={<Home />} />
 

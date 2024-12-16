@@ -71,7 +71,7 @@ const Index = () => {
                         <Button
                                         variant="outline"
                                         color="blue"
-                                        onClick={() => navigate(`/patient/${patient.id}`)}
+                                        onClick={() => navigate(`/appointment/${appointment.id}`)}
                                     >
                                         View
                                     </Button>

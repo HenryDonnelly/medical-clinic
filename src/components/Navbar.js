@@ -19,7 +19,7 @@ import { BiCommentError } from "react-icons/bi";
 
 
 const Navbar = () => {
-    const { logout } = useAuth();
+    const { logout,token } = useAuth();
     const [doctors, setDoctors] = useState([]);
     const navigate = useNavigate();
     const [collapsed, setCollapsed] = useState(false);
@@ -28,6 +28,16 @@ const Navbar = () => {
 
     //toggle 
     const handleToggleCollapse = () => setCollapsed(!collapsed);
+
+
+    const handleAuthClick = (event) => {
+        event.preventDefault();
+            if (token) {
+                logout();
+            }
+            navigate('/login');
+        }    
+    
 
     // testing collapsable navbar
 
@@ -73,7 +83,7 @@ const Navbar = () => {
                             color: 'inherit',
                         }}><GiMedicines style={{ marginRight: '8px', fontSize: '24px', verticalAlign: 'middle' }} />{!collapsed && <span>Prescriptions</span>}</Link></li>
 
-                        <Divider my="md" style={{marginRight:'40px'}} />
+                        {!collapsed && <Divider my="md" style={{ marginRight: '40px' }} />}
                         <div >
                         <li style={{ paddingBottom: '16px' }}>
                             <a href="/doctor/create" style={{
@@ -82,7 +92,7 @@ const Navbar = () => {
                                 fontFamily: "Arial",
                                 textDecoration: 'none'
                             }}>
-                                <CiCirclePlus stroke={1.5} style={{verticalAlign: 'middle', fontSize: '18px'}} />
+                                <CiCirclePlus stroke={1.5} style={{verticalAlign: 'middle', fontSize: '18px', marginBottom:'3px'}} />
                                 {!collapsed &&<span>Create Doctor</span>}
                             </a>
                         </li>
@@ -93,7 +103,7 @@ const Navbar = () => {
                                 fontFamily: "Arial",
                                 textDecoration: 'none'
                             }}>
-                                <CiCirclePlus stroke={1.5} style={{verticalAlign: 'middle', fontSize: '18px'}} />
+                                <CiCirclePlus stroke={1.5} style={{verticalAlign: 'middle', fontSize: '18px', marginBottom:'3px'}} />
                                 {!collapsed &&<span>Create Patient</span>}
                             </a>
                         </li>
@@ -104,7 +114,7 @@ const Navbar = () => {
                                 fontFamily: "Arial",
                                 textDecoration: 'none'
                             }}>
-                                <CiCirclePlus stroke={1.5} style={{verticalAlign: 'middle', fontSize: '18px'}} />
+                                <CiCirclePlus stroke={1.5} style={{verticalAlign: 'middle', fontSize: '18px', marginBottom:'3px'}} />
                                 {!collapsed &&<span>Create Appointment</span>}
                             </a>
                         </li>
@@ -115,7 +125,7 @@ const Navbar = () => {
                                 fontFamily: "Arial",
                                 textDecoration: 'none'
                             }}>
-                                <CiCirclePlus stroke={1.5} style={{verticalAlign: 'middle', fontSize: '18px'}} />
+                                <CiCirclePlus stroke={1.5} style={{verticalAlign: 'middle', fontSize: '18px', marginBottom:'3px'}} />
                                 {!collapsed &&<span>Create Diagnoses</span>}
                             </a>
                         </li>
@@ -126,15 +136,15 @@ const Navbar = () => {
                                 fontFamily: "Arial",
                                 textDecoration: 'none'
                             }}>
-                                <CiCirclePlus stroke={1.5} style={{verticalAlign: 'middle', fontSize: '18px'}} />
+                                <CiCirclePlus stroke={1.5} style={{verticalAlign: 'middle', fontSize: '18px', marginBottom:'3px'}} />
                                 {!collapsed &&<span>Create Presciption</span>}
                             </a>
                         </li>
                         </div>
                         <div style={{alignItems:'bottom'}}>
-                        <Divider my="md" style={{marginRight:'40px'}}/>
+                        {!collapsed && <Divider my="md" style={{ marginRight: '40px' }} />}
                         <li style={{ paddingBottom: '16px' }}>
-                            <a href="#" onClick={(event) => event.preventDefault()} style={{
+                            <a href="#" onClick={(event) => {event.preventDefault(); navigate('/register');}} style={{
                                 color: "white",
                                 padding: "5px",
                                 fontFamily: "Arial",    
@@ -145,14 +155,14 @@ const Navbar = () => {
                             </a>
                         </li>
                         <li style={{ paddingBottom: '16px' }}>
-                            <a href="#" onClick={(event) => event.preventDefault()} style={{
+                            <a href="#" onClick={handleAuthClick} style={{
                                 color: "white",
                                 padding: "5px",
                                 fontFamily: "Arial",
                                 textDecoration: 'none'
                             }}>
                                 <CiLogout  stroke={1.5} style={{verticalAlign: 'middle'}} />
-                                {!collapsed &&<span>Logout</span>}
+                                {!collapsed && <span>{token ? 'Logout' : 'Login'}</span>}
                             </a>
                         </li>
                         </div>

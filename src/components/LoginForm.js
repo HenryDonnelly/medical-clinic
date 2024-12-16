@@ -29,9 +29,9 @@ const LoginForm = () => {
     }
 
     return (
-        <form>
-            <input onChange={handleChange} value={form.email} type='email' name='email' placeholder='joe.bloggs@email.com'></input>
-            <input onChange={handleChange} value={form.password} type='password' name='password'></input>
+        <form style={{display: 'flex',flexDirection: 'column', alignItems:'center', height: '100vh', justifyContent:'center'}}>
+            <input style={{marginBottom:'10px'}}onChange={handleChange} value={form.email} type='email' name='email' placeholder='joe.bloggs@email.com'></input>
+            <input style={{marginBottom:'10px'}} onChange={handleChange} value={form.password} type='password' name='password'></input>
             <button onClick={handleSubmit}>Submit</button>
         </form>
     )

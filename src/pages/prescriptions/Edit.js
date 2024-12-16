@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../utils/useAuth";
 import { useForm } from '@mantine/form';
 import { TextInput, Select, Button } from '@mantine/core';
+import dayjs from 'dayjs';
 
 const Edit = () => {
     const { token } = useAuth();
@@ -15,6 +16,28 @@ const Edit = () => {
     const [doctors, setDoctors] = useState([]);
     const [diagnoses, setDiagnoses] = useState([]);
     const [medications, setMedications] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const form = useForm({
+        initialValues: {
+            patient_id: '',
+            doctor_id: '',
+            diagnosis_id: '',
+            medication: '',
+            dosage: '',
+            start_date: '',
+            end_date: '',
+        },
+        validate: {
+            patient_id: (value) => value ? null : 'Patient is required',
+            doctor_id: (value) => value ? null : 'Doctor is required',
+            diagnosis_id: (value) => value ? null : 'Diagnosis is required',
+            medication: (value) => value ? null : 'Medication is required',
+            dosage: (value) => value ? null : 'Dosage is required',
+            start_date: (value) => value ? null : 'Start date is required',
+            end_date: (value) => value ? null : 'End date is required',
+        },
+    });
 
     useEffect(() => {
         const fetchData = async () => {
@@ -71,39 +94,32 @@ const Edit = () => {
                 setMedications(
                     [...new Set(medicationsResponse.data.map(item => item.medication))] // Ensuring unique medications
                 );
+
+                if (prescriptionResponse.data) {
+                    form.setValues({
+                        patient_id: prescriptionResponse.data.patient_id,
+                        doctor_id: prescriptionResponse.data.doctor_id,
+                        diagnosis_id: prescriptionResponse.data.diagnosis_id,
+                        medication: prescriptionResponse.data.medication,
+                        dosage: prescriptionResponse.data.dosage,
+                        start_date: prescriptionResponse.data.start_date,
+                        end_date: prescriptionResponse.data.end_date,
+                    });
+                }
             } catch (err) {
                 console.error(err);
+            } finally {
+                setLoading(false);
             }
         };
 
         fetchData();
     }, [id, token]);
 
-    // Initialize the form with the prescription data (if available)
-    const form = useForm({
-        initialValues: {
-            patient_id: prescription ? prescription.patient_id : '',
-            doctor_id: prescription ? prescription.doctor_id : '',
-            diagnosis_id: prescription ? prescription.diagnosis_id : '',
-            medication: prescription ? prescription.medication : '',
-            dosage: prescription ? prescription.dosage : '',
-            start_date: prescription ? prescription.start_date : '',
-            end_date: prescription ? prescription.end_date : '',
-        },
-        validate: {
-            patient_id: (value) => value ? null : 'Patient is required',
-            doctor_id: (value) => value ? null : 'Doctor is required',
-            diagnosis_id: (value) => value ? null : 'Diagnosis is required',
-            medication: (value) => value ? null : 'Medication is required',
-            dosage: (value) => value ? null : 'Dosage is required',
-            start_date: (value) => value ? null : 'Start date is required',
-            end_date: (value) => value ? null : 'End date is required',
-        },
-    });
 
     const handleSubmit = async (values) => {
         try {
-            await axios.put(
+            await axios.patch(
                 `https://fed-medical-clinic-api.vercel.app/prescriptions/${id}`,
                 values,
                 {

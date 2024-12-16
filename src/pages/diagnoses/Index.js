@@ -31,9 +31,6 @@ const DiagnosesIndex = () => {
         fetchData();
     }, []);
 
-    if (!diagnoses.length) {
-        return <div>Loading...</div>
-    }
 
     return (
         <div>
@@ -54,7 +51,7 @@ const DiagnosesIndex = () => {
                             <Button
                                             variant="outline"
                                             color="blue"
-                                            onClick={() => navigate(`/patient/${diagnoses.id}`)}
+                                            onClick={() => navigate(`/diagnoses/${diagnosis.id}`)}
                                         >
                                             View
                                         </Button>

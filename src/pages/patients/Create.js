@@ -94,12 +94,12 @@ const Create = () => {
                     required
                 />
                 <TextInput
-                    label="Appointment Date"
-                    name="appointment_date"
+                    label="Date of Birth"
+                    name="date of birth"
                     type="date"
-                    value={form.values.appointment_date}
-                    onChange={(e) => form.setFieldValue('appointment_date', e.currentTarget.value)}
-                    error={form.errors.appointment_date}
+                    value={form.values.date_of_birth}
+                    onChange={(e) => form.setFieldValue('date_of_birth', e.currentTarget.value)}
+                    error={form.errors.date_of_birth}
                     required
                 />
                 

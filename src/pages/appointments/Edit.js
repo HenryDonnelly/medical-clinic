@@ -68,7 +68,7 @@
             };
 
             fetchDetails();
-        }, [id, token, form]);  // Avoid re-triggering too many times
+        }, [id, token,]); // removed form passed here
 
 
         const handleSubmit = async (values) => {
@@ -79,7 +79,7 @@
                     patient_id: values.patient_id,
                 };
 
-                await axios.put(`https://fed-medical-clinic-api.vercel.app/appointments/${id}`, updatedAppointment, {
+                await axios.patch(`https://fed-medical-clinic-api.vercel.app/appointment/${id}`, updatedAppointment, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },

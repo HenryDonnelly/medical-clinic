@@ -5,6 +5,7 @@ import { useAuth } from "../../utils/useAuth";
 import { Link } from "react-router-dom";
 import {Button} from '@mantine/core'
 import { useNavigate } from 'react-router-dom';
+import dayjs from "dayjs";
 
 
 const SinglePrescription = () => {
@@ -45,8 +46,9 @@ const SinglePrescription = () => {
       <p>Medication: {prescription.medication}</p>
       <p>Patient: {prescription.patient_first_name} {prescription.patient_last_name}</p>
       <p>Dosage: {prescription.dosage}</p>
-      <p>Start Date: {new Date(prescription.start_date).toLocaleDateString()}</p>
-      <p>End Date: {new Date(prescription.end_date).toLocaleDateString()}</p>
+      <p>Start Date: {dayjs.unix(prescription.start_date).format('DD/MM/YYYY')}</p>
+      <p>End Date: {dayjs.unix(prescription.end_date).format('DD/MM/YYYY')}</p>
+      
 
         <div>
 

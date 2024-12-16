@@ -2,34 +2,40 @@ import axios from 'axios'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../utils/useAuth';
+import {notifications} from  '@mantine/notifications'
 
 const RegisterForm = (props) => {
     const navigate = useNavigate();
     const {login} = useAuth();
 
     const [form, setForm] = useState({
-        full_name: '',
+        first_name: '',
+        last_name:'',
         email: '',
         password: ''
     })
 
+    
+
     const handleSubmit = (e) => {
         // The form will cause a refresh by default. We don't want that, because our state will disappear.
         e.preventDefault();
+        
 
         axios.post(`https://fed-medical-clinic-api.vercel.app/register`, form)
             .then((res) => {
                 console.log(res)
 
-                localStorage.setItem('user', JSON.stringify(res.data.user))
+                localStorage.setItem('user', JSON.stringify(res.data.user)) 
 
                 login(form.email, form.password)
 
-                navigate('/')
-
-            })
+                navigate('/');
+                alert('successfully registered')
+                })                    
             .catch((err) => {
                 console.error(err)
+                alert('Registration failed. Please try again.');
             })
     }
 
@@ -41,8 +47,10 @@ const RegisterForm = (props) => {
     }
 
     return (
-        <form>
-            <input onChange={handleChange} value={form.full_name} type='text' name='full_name' placeholder='Joe Bloggs'></input>
+        <form style={{display: 'flex',flexDirection: 'column', alignItems:'center', height: '100vh', justifyContent:'center'}}>
+            <input onChange={handleChange} value={form.first_name} type='text' name='first_name' placeholder='Joe'></input>
+            <br />
+            <input onChange={handleChange} value={form.last_name} type='text' name='last_name' placeholder='Bloggs'></input>
             <br />
             <input onChange={handleChange} value={form.email} type='email' name='email' placeholder='joe.bloggs@email.com'></input>
             <br />
